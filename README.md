@@ -1,0 +1,35 @@
+# Agent Dispatch OS (Scaffold)
+
+A minimal, runnable scaffold for an **Agentic Service Dispatch OS**:
+- AIM layer: agent runtime + tools + (stub) LLM/RAG + guardrails/workflow
+- Role economy layer: roles/contracts/ledger (minimal)
+- Domain: `private_chef` (lead -> offer -> booking) with sample agents & tools
+- Storage: in-memory repository (easy to swap with DB later)
+
+## Quickstart
+
+### 1) Install
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -U pip
+pip install -e .
+```
+
+### 2) Run API
+```bash
+uvicorn app.main:app --reload --port 8000
+```
+
+### 3) Test with curl
+```bash
+curl -X POST http://localhost:8000/private_chef/message \
+  -H "Content-Type: application/json" \
+  -d '{"channel":"wechat","external_id":"wx_abc","source":"ad_1","text":"我想周六晚上请8个人吃饭，预算3000"}'
+```
+
+You should get a JSON response with `reply`, and updated `lead` / `offer` as the conversation progresses.
+
+## Notes
+- This is a **scaffold**. Many modules are intentionally minimal stubs.
+- Swap `storage/memory.py` with a DB-backed repository later without changing domain logic.
