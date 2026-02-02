@@ -180,9 +180,11 @@
 * 如果 lead.req 缺少关键信息
   → `ReceptionAgent`
 * 如果信息齐全，且还没生成 Offer
-  → `DispatchAgent`
+  → `ProposalAgent`
 * 如果用户话术中出现砍价意图
   → `NegotiationAgent`
+* 如果定金已付但尚未派单
+  → `DispatchAgent`
 * 如果已生成 booking 且待支付 / 履约
   → `OpsAgent`
 
@@ -384,12 +386,17 @@ Agent 不做业务判断，只负责：
 * 每次最多问 2 个问题
 * 信息齐全后推进 stage
 
-#### DispatchAgent
+#### ProposalAgent
 
-* 调用 dispatch_engine
+* 调用 proposal_engine
 * 生成 Offer
 * create_booking
 * 给出“可成交”的回复（价格 + 锁档 + 支付）
+
+#### DispatchAgent
+
+* 调用 dispatch_engine
+* 连接方案与厨师、确认可履约
 
 #### NegotiationAgent
 
@@ -428,4 +435,3 @@ Agent 不做业务判断，只负责：
 你在写的是：
 
 > **一个可以替代“人工接线 + 派单 + 议价 + 锁档”的 Agent 系统**
-

@@ -5,9 +5,14 @@ from app.storage.memory import InMemoryRepo
 from app.storage.models import Chef
 from app.aim.tools import ToolRegistry, Tool
 from app.aim.runtime import AgentRuntime
+from app.aim.llm.registry import build_llm_registry
+from app.config import settings
 from app.domains.private_chef.tools import build_tools
 from app.domains.private_chef.agents.reception import ReceptionAgent
 from app.domains.private_chef.agents.dispatch import DispatchAgent
+from app.domains.private_chef.agents.negotiation import NegotiationAgent
+from app.domains.private_chef.agents.ops import OpsAgent
+from app.domains.private_chef.agents.proposal import ProposalAgent
 from app.domains.private_chef.api import router as private_chef_router
 
 setup_logging()
@@ -37,21 +42,28 @@ repo.chefs["chef_2"] = Chef(
     availability={}
 )
 
-tools = ToolRegistry()
-for name, fn in build_tools(repo).items():
+tools = ToolRegistry(repo)
+enable_any_llm = settings.enable_llm or settings.enable_llm_extract
+llm_registry = build_llm_registry() if enable_any_llm else None
+for name, fn in build_tools(repo, llm_registry).items():
     tools.register(Tool(name=name, description=name, fn=fn))
 
 runtime = AgentRuntime(tools)
-runtime.register_agent(ReceptionAgent(repo))
-runtime.register_agent(DispatchAgent(repo))
+runtime.register_agent(ReceptionAgent(repo, llm_registry))
+runtime.register_agent(DispatchAgent(repo, llm_registry))
+runtime.register_agent(NegotiationAgent(repo, llm_registry))
+runtime.register_agent(OpsAgent(repo, llm_registry))
+runtime.register_agent(ProposalAgent(repo, llm_registry))
 
 # Attach to app state for dependency injection
 app.state.repo = repo
 app.state.runtime = runtime
 app.state.tools = tools
+app.state.llm_registry = llm_registry
 
 app.include_router(private_chef_router)
 
 @app.get("/")
 def root():
+    # Basic service info endpoint.
     return {"app": "agent-dispatch-os", "tools": tools.list(), "agents": list(runtime.agents.keys())}

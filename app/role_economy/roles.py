@@ -10,5 +10,17 @@ class Role(BaseModel):
     permission: Permission
 
 ROLE_USER_PROXY = Role(role_name="UserProxy", permission=Permission(allow_tools=["extract_requirement"]))
-ROLE_PLATFORM_SALES = Role(role_name="PlatformSales", permission=Permission(allow_tools=["check_availability","make_offer","create_booking","create_payment_link"]))
+ROLE_PLATFORM_SALES = Role(
+    role_name="PlatformSales",
+    permission=Permission(
+        allow_tools=[
+            "extract_requirement",
+            "check_availability",
+            "make_offer",
+            "create_booking",
+            "create_payment_link",
+            "confirm_deposit",
+        ]
+    ),
+)
 ROLE_MERCHANT_SERVICE = Role(role_name="MerchantService", permission=Permission(allow_tools=["check_availability"]))
